@@ -1,0 +1,15 @@
+# Ignore saved model binaries
+saved_model/
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+
+# Streamlit cache
+.streamlit/
+
+# OS files
+.DS_Store

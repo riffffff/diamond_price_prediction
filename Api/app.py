@@ -14,6 +14,40 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Ke folder Diamonds/saved_model/
 MODEL_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "saved_model"))
 
+import requests
+
+def download_model_if_missing():
+    """Download model.pkl and features.pkl from MODEL_BASE_URL if they are missing.
+
+    Set environment variable MODEL_BASE_URL to the base URL (no trailing slash),
+    e.g. https://my-bucket.s3.amazonaws.com/models
+    """
+    os.makedirs(MODEL_DIR, exist_ok=True)
+    base_url = os.getenv("MODEL_BASE_URL")
+    if not base_url:
+        # No external model URL provided; assume model exists in saved_model/
+        return
+
+    for fname in ("model.pkl", "features.pkl"):
+        outpath = os.path.join(MODEL_DIR, fname)
+        if os.path.exists(outpath):
+            continue
+        url = f"{base_url.rstrip('/')}/{fname}"
+        try:
+            r = requests.get(url, stream=True, timeout=60)
+            r.raise_for_status()
+            with open(outpath, "wb") as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+            print(f"Downloaded {fname} to {outpath}")
+        except Exception as e:
+            print(f"Failed to download {url}: {e}")
+
+
+# Try to download model files if MODEL_BASE_URL is set
+download_model_if_missing()
+
 # Load model & features
 model = load_model(os.path.join(MODEL_DIR, "model.pkl"))
 feature_cols = load_features(os.path.join(MODEL_DIR, "features.pkl"))
