@@ -48,36 +48,6 @@ services:
       retries: 3
       start_period: 40s
 
-  nginx:
-    image: nginx:stable-alpine
-    container_name: diamond_nginx
-    restart: unless-stopped
-    ports:
-      - "8888:80"
-      - "4443:443"
-    volumes:
-      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./deploy/certbot/www:/var/www/certbot:ro
-      - ./deploy/certbot/conf:/etc/letsencrypt:ro
-    depends_on:
-      - api
-      - streamlit
-    networks:
-      - diamond_net
-    healthcheck:
-      test: ["CMD", "nginx", "-t"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  certbot:
-    image: certbot/certbot:latest
-    container_name: diamond_certbot
-    volumes:
-      - ./deploy/certbot/www:/var/www/certbot:rw
-      - ./deploy/certbot/conf:/etc/letsencrypt:rw
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-
 networks:
   diamond_net:
     driver: bridge
