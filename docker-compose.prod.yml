@@ -8,6 +8,8 @@ services:
     image: diamond_api:latest
     container_name: diamond_api
     restart: unless-stopped
+    ports:
+      - "5000:5000"
     environment:
       - FLASK_ENV=production
     volumes:
@@ -28,12 +30,13 @@ services:
     image: diamond_streamlit:latest
     container_name: diamond_streamlit
     restart: unless-stopped
+    ports:
+      - "8501:8501"
     environment:
       - API_URL=http://api:5000/predict
       - STREAMLIT_SERVER_HEADLESS=true
       - STREAMLIT_SERVER_PORT=8501
       - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
-      - STREAMLIT_SERVER_BASE_URL_PATH=/diamond
     depends_on:
       - api
     networks:
